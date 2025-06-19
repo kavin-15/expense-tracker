@@ -1,5 +1,15 @@
 import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
+    input: {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  padding: 10,
+  borderRadius: 8,
+  marginBottom: 12,
+  fontSize: 14,
+  backgroundColor: '#fff',
+},
+
   container: {
     padding: 16,
     backgroundColor: '#fff',},
@@ -30,6 +40,24 @@ const styles = StyleSheet.create({
     meta:{
         fontSize: 12,
         color: '#888',
+    },
+    filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+    gap: 8,
+    },
+    filterOption: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#eee',
+    color: '#333',
+    },
+    activeFilter: {
+    backgroundColor: '#2e86de',
+    color: '#fff',
+    fontWeight: 'bold',
     },
     }
 );

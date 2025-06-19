@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  Alert,
-  FlatList,
-} from 'react-native';
+import {View,Text,TouchableOpacity,Modal,TextInput,Alert,FlatList,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 import styles from './HomeScreenStyle';
+import { filterOptions, getFilteredExpenses } from '../Reusable features/DateRangeFilter';
 
 type Expense = {
   createdAt: string;
@@ -21,16 +14,6 @@ type Expense = {
   exchangeRate: number;
   currencyCode: string;
 };
-
-const filterOptions = [
-  'This week',
-  'Last Week',
-  'This month',
-  'Last month',
-  'This Year',
-  'Last Year',
-  'Custom',
-];
 
 const HomeScreen = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -111,60 +94,13 @@ const HomeScreen = () => {
       setAmount('');
     };
 
-  const getFilteredExpenses = () => {
-    const now = new Date();
-    let startDate: Date;
-    let endDate: Date;
+  const filteredExpenses = getFilteredExpenses(
+  expenses,
+  filter,
+  customStartDate,
+  customEndDate
+);
 
-    switch (filter) {
-      case 'This week': {
-        const day = now.getDay();
-        startDate = new Date(now);
-        startDate.setDate(now.getDate() - day);
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 6);
-        break;
-      }
-      case 'Last Week': {
-        const day = now.getDay();
-        endDate = new Date(now);
-        endDate.setDate(now.getDate() - day - 1);
-        startDate = new Date(endDate);
-        startDate.setDate(endDate.getDate() - 6);
-        break;
-      }
-      case 'This month':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        break;
-      case 'Last month':
-        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
-        break;
-      case 'This Year':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear(), 11, 31);
-        break;
-      case 'Last Year':
-        startDate = new Date(now.getFullYear() - 1, 0, 1);
-        endDate = new Date(now.getFullYear() - 1, 11, 31);
-        break;
-      case 'Custom':
-        if (!customStartDate || !customEndDate) return [];
-        startDate = new Date(customStartDate);
-        endDate = new Date(customEndDate);
-        break;
-      default:
-        return expenses;
-    }
-
-    return expenses
-      .filter((e) => {
-        const createdAt = new Date(e.createdAt);
-        return createdAt >= startDate && createdAt <= endDate;
-      })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  };
 
   return (
     <View style={styles.container}>
@@ -206,7 +142,7 @@ const HomeScreen = () => {
 
     <Text style={styles.sectionTitle}>Recent Expenses</Text>
     <FlatList
-        data={expenses}
+        data={filteredExpenses.slice(0,10)}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
             const date = new Date(item.createdAt);
