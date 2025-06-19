@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Modal,
   TextInput,
@@ -11,6 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+// import DateTimePicker from '@react-native-community/datetimepicker';
+import styles from './HomeScreenStyle';
 
 type Expense = {
   createdAt: string;
@@ -31,8 +32,6 @@ const filterOptions = [
   'Custom',
 ];
 
-// Removed unused usdRate and fetchUsdRate, as currencyCode is only available inside HomeScreen.
-
 const HomeScreen = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -43,6 +42,8 @@ const HomeScreen = () => {
   const [customEndDate, setCustomEndDate] = useState('');
   const [currencyCode, setCurrencyCode] = useState('USD'); // Default currency code
   const [exchangeRate, setExchangeRate] = useState<number | null>(null); // Exchange rate for the currency
+  const [expenseDate, setExpenseDate] = useState(new Date());
+  const [selectExpenseCurrency, setSelectedExpenseCurrency] = useState(currencyCode);
   const currencyOptions = [
     { code: 'USD', label: 'US Dollar' },
     { code: 'EUR', label: 'Euro' },
@@ -57,6 +58,9 @@ const HomeScreen = () => {
     fetchLatestRates();
   }, [currencyCode]);
     const [USDRate, setUSDRate] = useState<number | null>(null);
+
+    console.log("USDRate:", USDRate);
+    
     const fetchUSDRate = async () => {
     try {
         const res = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currencyCode}`);
@@ -165,7 +169,6 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to Expense Tracker!</Text>
-
       <View style={styles.row}>
         <TouchableOpacity style={styles.card} onPress={() => setModalVisible(true)}>
           <Ionicons name="add-circle-outline" size={24} color="#333" />
@@ -194,12 +197,12 @@ const HomeScreen = () => {
             ₹1 = {exchangeRate.toFixed(4)} {currencyCode} (Latest)
         </Text>
     )}
-    {USDRate && (
+    {/* {USDRate(
         <View style={styles.rateBox}>
             <Ionicons name="swap-horizontal-outline" size={24} color="#333" style={{ marginRight: 6 }} />
-            <Text style={styles.rateText}>1 USD = 83.45 INR (Hardcoded)</Text>
+            <Text style={styles.rateText}>1 USD = {USDRate.toFixed(2)}{currencyCode}</Text>
         </View>
-    )}
+    )} */}
 
     <Text style={styles.sectionTitle}>Recent Expenses</Text>
     <FlatList
@@ -267,102 +270,5 @@ const HomeScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#333' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
-  card: {
-    backgroundColor: '#f1f1f1',
-    padding: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 10,
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  cardText: { fontWeight: '600', color: '#333' },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 12,
-    color: '#444',
-  },
-  transaction: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#f8f9fa',
-    padding: 12,
-    marginBottom: 6,
-    borderRadius: 8,
-  },
-  transactionText: { fontSize: 14 },
-  transactionAmount: { fontSize: 14, fontWeight: 'bold' },
-  subText: {
-    fontSize: 12,
-    color: '#888',
-  },
-  filterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  filterLabel: { fontWeight: 'bold', marginRight: 8 },
-  filterOption: {
-    marginRight: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: '#eee',
-    color: '#333',
-    marginBottom: 6,
-  },
-  activeFilter: {
-    backgroundColor: '#2e86de',
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    elevation: 5,
-  },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  addButton: {
-    backgroundColor: '#2e86de',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  rateBox:{
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f1f1f1',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  rateText: { fontSize: 14, fontWeight: '500', color: '#2e86de' },
-  addButtonText: { color: '#fff', fontWeight: 'bold' },
-  cancelText: { textAlign: 'center', color: '#888', marginTop: 4 },
-});
 
 export default HomeScreen;

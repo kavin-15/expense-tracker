@@ -32,9 +32,9 @@ const AppNavigator = () => {
           })}
         >
           <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="About" component={AboutScreen} />
           <Tab.Screen name ="Expense" component={ExpenseScreen} />
           <Tab.Screen name ="Reports" component={ReportsScreen} />
+          <Tab.Screen name="About" component={AboutScreen} />
           <Tab.Screen name ="Settings" component={SettingsScreen} />
         </Tab.Navigator>
       </NavigationContainer>
