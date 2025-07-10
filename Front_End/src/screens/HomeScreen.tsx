@@ -8,7 +8,7 @@ import { filterOptions, getFilteredExpenses } from '../Reusable features/DateRan
 
 type Expense = {
   createdAt: string;
-  id: string;
+  expenseID: string;
   description: string;
   amount: number;
   exchangeRate: number;
@@ -73,25 +73,66 @@ const HomeScreen = () => {
         Alert.alert('Oops!', 'You forgot to add a description or amount.');
         return;
       }
-      const createdAt = new Date();
-      const dateStr = createdAt.toISOString().split('T')[0];
-      const res = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currencyCode}`);
-      const data = await res.json();
-      const rate = data.rates[currencyCode];
-  
-      const newExpense: Expense = {
-        id: Date.now().toString(),
-        description,
+      const expense ={
+        expenseID: Date.now().toString(),
+        description: description,
         amount: parseFloat(amount),
         createdAt: new Date().toISOString(),
-        exchangeRate: rate,
-        currencyCode: currencyCode,
+        exchangeRate: 1,
+        currencyCode: "USD"
       };
+
+      try{
+        console.log("Sending data to AWS:", expense);
+        const response = await fetch(
+          "https://u1t9aq8uia.execute-api.us-west-1.amazonaws.com/Prod/expense",
+          {
+            method: "POST",
+            headers:{
+              "Content-Type":"application/json"
+            },
+            body: JSON.stringify(expense)
+          }
+        );
+
+        const data = await response.json();
+        console.log("AWS Response", data);
+
+        if(response.ok){
+          Alert.alert("Success, Expense added!");
+          console.log(data);
+
+          setExpenses(prev => [expense, ...prev]);
+          setModalVisible(false);
+          setDescription('');
+          setAmount('');
+        }else{
+          console.error("Error:", data);
+          Alert.alert("Error, Please try again.")
+        }
+      }catch (error){
+        console.error("Error:", error);
+        Alert.alert("Error, Failed to connect to server, Please try again");
+      }
+      // const createdAt = new Date();
+      // const dateStr = createdAt.toISOString().split('T')[0];
+      // const res = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currencyCode}`);
+      // const data = await res.json();
+      // const rate = data.rates[currencyCode];
   
-      setExpenses((prev) => [newExpense, ...prev]);
-      setModalVisible(false);
-      setDescription('');
-      setAmount('');
+      // const newExpense: Expense = {
+      //   id: Date.now().toString(),
+      //   description,
+      //   amount: parseFloat(amount),
+      //   createdAt: new Date().toISOString(),
+      //   exchangeRate: rate,
+      //   currencyCode: currencyCode,
+      // };
+  
+      // setExpenses((prev) => [newExpense, ...prev]);
+      // setModalVisible(false);
+      // setDescription('');
+      // setAmount('');
     };
 
   const filteredExpenses = getFilteredExpenses(
@@ -143,7 +184,7 @@ const HomeScreen = () => {
     <Text style={styles.sectionTitle}>Recent Expenses</Text>
     <FlatList
         data={filteredExpenses.slice(0,10)}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.expenseID}
         renderItem={({ item }) => {
             const date = new Date(item.createdAt);
             const converted = item.amount * item.exchangeRate;
