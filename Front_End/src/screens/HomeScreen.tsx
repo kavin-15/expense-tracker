@@ -37,34 +37,22 @@ const HomeScreen = () => {
     { code: 'CAD', label: 'Canadian Dollar' },
     { code: 'CNY', label: 'Chinese Yuan' },
   ];
-  useEffect(() => {
-    fetchLatestRates();
-  }, [currencyCode]);
-    const [USDRate, setUSDRate] = useState<number | null>(null);
-
-    console.log("USDRate:", USDRate);
-    
-    const fetchUSDRate = async () => {
+  const fetchExpensesFromAWS = async () => {
     try {
-        const res = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currencyCode}`);
-        const data = await res.json();
-        setUSDRate(data.rates[currencyCode]);
+      const res = await fetch("https://u1t9aq8uia.execute-api.us-west-1.amazonaws.com/Prod/getExpense");
+      const data = await res.json();
+      console.log("Fetched from AWS:", data);
+      setExpenses(data);  // Update state with fetched data
     } catch (error) {
-        console.error('Error fetching USD rate:', error);
-    }
-    };
-  useEffect(() => {
-    fetchUSDRate();
-  }, [currencyCode]);
-  const fetchLatestRates = async () => {
-    try{
-        const res = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currencyCode}`);
-        const data = await res.json();
-        setExchangeRate(data.rates[currencyCode]);
-    } catch (error) {
-        console.error('Error fetching exchange rates:', error);
+      console.error("Error fetching expenses from AWS:", error);
+      Alert.alert("Error", "Failed to fetch expenses");
     }
   };
+
+  useEffect(() => {
+  fetchExpensesFromAWS();
+}, []);
+
 
   const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
 
@@ -102,7 +90,7 @@ const HomeScreen = () => {
           Alert.alert("Success, Expense added!");
           console.log(data);
 
-          setExpenses(prev => [expense, ...prev]);
+          await fetchExpensesFromAWS();
           setModalVisible(false);
           setDescription('');
           setAmount('');
